@@ -1,0 +1,146 @@
+﻿{
+	"doctors": [
+		{
+			"comment": "",
+			"id": "012"
+		},
+		{
+			"comment": "",
+			"id": "013"
+		},
+		{
+			"comment": "",
+			"id": "014"
+		}
+	],
+	"ids": {
+		"accession number": "RLADD01000009306",
+		"study id": "RLSDD01000009279",
+		"study instance uid": "1.2.276.0.7230010.3.1.2.1417964692.10880.1568735355.16970"
+	},
+	"nodules": [
+		[
+			{
+				"012": {
+					"diameter (mm)": 3.5,
+					"expert decision": [
+						{
+							"comment": "",
+							"decision": "doubt",
+							"id": "Валерия",
+							"machine learning": false,
+							"proper size": true,
+							"type": "с"
+						}
+					],
+					"series no": "4",
+					"type": "с",
+					"version": "4.0",
+					"x": 358.0,
+					"y": 314.0,
+					"z": 1903.7,
+					"z type": "mm"
+				},
+				"013": null,
+				"014": null
+			}
+		],
+		[
+			{
+				"012": null,
+				"013": {
+					"diameter (mm)": 4.0,
+					"expert decision": [
+						{
+							"comment": "",
+							"decision": "confirmed",
+							"id": "Валерия",
+							"machine learning": true,
+							"proper size": true,
+							"type": "п"
+						}
+					],
+					"series no": "5",
+					"type": "п",
+					"version": "4.0",
+					"x": 161.0,
+					"y": 204.0,
+					"z": 1903.5,
+					"z type": "mm"
+				},
+				"014": null
+			}
+		],
+		[
+			{
+				"012": null,
+				"013": {
+					"diameter (mm)": 5.0,
+					"expert decision": [
+						{
+							"comment": "",
+							"decision": "rejected",
+							"id": "Валерия",
+							"machine learning": false,
+							"proper size": false,
+							"type": ""
+						}
+					],
+					"series no": "5",
+					"type": "п",
+					"version": "4.0",
+					"x": 215.0,
+					"y": 180.0,
+					"z": 1863.0,
+					"z type": "mm"
+				},
+				"014": null
+			}
+		],
+		[
+			{
+				"012": {
+					"diameter (mm)": 3.7,
+					"expert decision": [
+						{
+							"comment": "",
+							"decision": "confirmed",
+							"id": "Валерия",
+							"machine learning": true,
+							"proper size": true,
+							"type": "с"
+						}
+					],
+					"series no": "4",
+					"type": "с",
+					"version": "4.0",
+					"x": 327.0,
+					"y": 345.0,
+					"z": 1737.3,
+					"z type": "mm"
+				},
+				"013": null,
+				"014": {
+					"diameter (mm)": 3.0000000000000004,
+					"expert decision": [
+						{
+							"comment": "",
+							"decision": "confirmed",
+							"id": "Валерия",
+							"machine learning": true,
+							"proper size": true,
+							"type": "с"
+						}
+					],
+					"series no": "4",
+					"type": "с",
+					"version": "4.0",
+					"x": 327.0,
+					"y": 344.0,
+					"z": 1737.3,
+					"z type": "mm"
+				}
+			}
+		]
+	]
+}

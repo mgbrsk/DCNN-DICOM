@@ -1,0 +1,439 @@
+"""usage: reslice.py <glob>
+where <glob> refers to a set of DICOM image files.
+
+Example: python reslice.py "*.dcm". The quotes are needed to protect the glob
+from your system and leave it for the script."""
+
+import pydicom
+import numpy as np
+import matplotlib.pyplot as plt
+import sys
+import glob
+
+# load the DICOM files
+files=[]
+print('glob: {}'.format(sys.argv[1]))
+for fname in glob.glob(sys.argv[1], recursive=False):
+    print("loading: {}".format(fname))
+    files.append(pydicom.read_file(fname))
+
+print("file count: {}".format(len(files)))
+
+# skip files with no SliceLocation (eg scout views)
+slices=[]
+skipcount=0
+for f in files:
+    if hasattr(f, 'SliceLocation'):
+        slices.append(f)
+    else:
+        skipcount = skipcount + 1
+
+print("skipped, no SliceLocation: {}".format(skipcount))
+
+# ensure they are in the correct order
+slices = sorted(slices, key=lambda s: s.SliceLocation)
+
+# pixel aspects, assuming all slices are the same
+ps = slices[0].PixelSpacing
+ss = slices[0].SliceThickness
+ax_aspect = ps[1]/ps[0]
+sag_aspect = ps[1]/ss
+cor_aspect = ss/ps[0]
+
+# create 3D array
+img_shape = list(slices[0].pixel_array.shape)
+img_shape.append(len(slices))
+img3d=np.zeros(img_shape)
+
+# fill 3D array with the images from the files
+for i, s in enumerate(slices):
+    img2d = s.pixel_array
+    img3d[:,:,i] = img2d
+
+# plot 3 orthogonal slices
+a1 = plt.subplot(2,2,1)
+plt.imshow(img3d[:,:,img_shape[2]//2])
+a1.set_aspect(ax_aspect)
+
+a2 = plt.subplot(2,2,2)
+plt.imshow(img3d[:,img_shape[1]//2,:])
+a2.set_aspect(sag_aspect)
+
+a3 = plt.subplot(2,2,3)
+plt.imshow(img3d[img_shape[0]//2,:,:].T)
+a3.set_aspect(cor_aspect)
+
+plt.show()
+
+
+
+
+def zdTranslator(index, img3d_ipp):
+    ipp, slices = img3d_ipp
+    y_temp = df['y'].iloc[index]
+    x = int(df['x'].iloc[index]) # x на фронтальном срезе
+    y = int(df['y'].iloc[index]) # z на фронтальном срезе
+    zm = int(df['z'].iloc[index]) # y на фронтальном срезе
+    dm = df['diameter'].iloc[index]
+    z = ipp.index((nearest(ipp, zm)))
+    d = dm / slices[0].PixelSpacing[0]
+    df['z_pixel'].iloc[index] = z
+    df['d_pixel'].iloc[index] = d
+    print(f'New y(old z):{z}, d:{d}')
+    
+    xmin = x - d / 2
+    xmax = x + d / 2
+    ymin = z - d / 2
+    ymax = z + d / 2
+    width = xmax - xmin
+    height = ymax - ymin
+	
+	
+	
+	
+	def ImageSwapper(index, img3d_ipp):
+    img3d, ipp, slices = img3d_ipp
+    fig = plt.figure() # Отрисовка рамки
+
+    # Задание осей
+    ax = fig.add_axes([0,0,1,1])
+    
+    print(f'Current coordinates for index {index}:')
+    y_temp = df['y'].iloc[index]
+    print(y_temp)
+    x = int(df['x'].iloc[index]) # x на фронтальном срезе
+    y = int(df['y'].iloc[index]) # z на фронтальном срезе
+    zm = int(df['z'].iloc[index]) # y на фронтальном срезе
+    z = ipp.index((nearest(ipp, zm)))
+    dm = df['diameter'].iloc[index]
+    d = dm / slices[0].PixelSpacing[0]
+    xmin = x - d / 2
+    xmax = x + d / 2
+    ymin = z - d / 2
+    ymax = z + d / 2
+    width = xmax - xmin
+    height = ymax - ymin
+    print(f'New y(old z):{z}, d:{d}')
+    print(f'width: {width}, height: {height}')
+    # read and plot the image
+    image = img3d[y,:,:].T
+    plt.imshow(image, aspect='auto')
+    save_name = 'img\\' + str(index)
+    plt.savefig(save_name)
+    edgecolor = 'r'
+    ax.annotate('tumor', xy=(xmax,ymin))
+    # rect = patches.Rectangle((xmin,ymin), width, height, edgecolor = edgecolor, facecolor = 'none')
+    rect = patches.Rectangle((xmin-10,ymin-10), width+20, height+20, edgecolor = edgecolor, facecolor = 'none')
+    ax.add_patch(rect)
+    fig.set_figwidth(20)    #  ширина и
+    fig.set_figheight(20)    #  высота "Figure"
+	
+	
+	
+	
+	# for i in range(len(df['Protocol'])):
+#     print(i)
+#     len(df['Protocol'])
+
+
+
+
+
+
+
+
+
+# Этот код пока вроде не нужен
+
+# authors : Guillaume Lemaitre <g.lemaitre58@gmail.com>
+# license : MIT
+
+# fetch the path to the test data
+#filepath = get_testdata_file('DICOMDIR')
+
+# Код перенесен выше
+# files_arr = get_files(r'C:\Users\nonam\Jupyter\DICOM\RLADD01000009306_RLSDD01000009279\CT\Chest-HCT',
+#                      r'CT_1.2.276.0.7230010.3.1.4.1417964692')
+# print('Path to the DICOM directory: {}'.format(filepath))
+# # load the data
+for item in files_arr:
+    dicom_dir = read_dicomdir(item)
+    base_dir = dirname(item)
+
+
+    # print(dicom_dir)
+    # print(dicom_dir.patient_records)
+
+    # go through the patient record and print information
+    for patient_record in files_arr:
+        if (hasattr(patient_record, 'PatientID') and
+                hasattr(patient_record, 'PatientName')):
+            print("Patient: {}: {}".format(patient_record.PatientID,
+                                           patient_record.PatientName))
+        studies = patient_record.children
+        # got through each serie
+        for study in studies:
+            print(" " * 4 + "Study {}: {}: {}".format(study.StudyID,
+                                                      study.StudyDate,
+                                                      study.StudyDescription))
+            all_series = study.children
+            # go through each serie
+            for series in all_series:
+                image_count = len(series.children)
+                plural = ('', 's')[image_count > 1]
+
+                # Write basic series info and image count
+
+                # Put N/A in if no Series Description
+                if 'SeriesDescription' not in series:
+                    series.SeriesDescription = "N/A"
+                print(" " * 8 + "Series {}: {}: {} ({} image{})".format(
+                    series.SeriesNumber, series.Modality, series.SeriesDescription,
+                    image_count, plural))
+
+                # Open and read something from each image, for demonstration
+                # purposes. For simple quick overview of DICOMDIR, leave the
+                # following out
+                print(" " * 12 + "Reading images...")
+                image_records = series.children
+                image_filenames = [join(base_dir, *image_rec.ReferencedFileID)
+                                   for image_rec in image_records]
+
+                datasets = [dicom.dcmread(image_filename)
+                            for image_filename in image_filenames]
+
+                patient_names = set(ds.PatientName for ds in datasets)
+                patient_IDs = set(ds.PatientID for ds in datasets)
+
+                # List the image filenames
+                print("\n" + " " * 12 + "Image filenames:")
+                print(" " * 12, end=' ')
+                pprint(image_filenames, indent=12)
+
+                # Expect all images to have same patient name, id
+                # Show the set of all names, IDs found (should each have one)
+                print(" " * 12 + "Patient Names in images..: {}".format(
+                    patient_names))
+                print(" " * 12 + "Patient IDs in images..: {}".format(
+                    patient_IDs))
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					"""Бекап скрипта загрузи"""
+# # Измененный скрипт загрузки, пока используем его
+
+# # load the DICOM files
+# files=[]
+# files_arr = d
+# #print('glob: {}'.format(sys.argv[1]))
+# print('loading start...')
+# for fname in files_arr:
+    
+#     #print("loading: {}".format(fname))
+#     files.append(dicom.read_file(fname))
+
+# print("Loading done. File count: {}".format(len(files)))
+
+# # skip files with no SliceLocation (eg scout views)
+# slices=[]
+# skipcount=0
+# for f in files:
+#     if hasattr(f, 'SliceLocation'):
+#         slices.append(f)
+#     else:
+#         skipcount = skipcount + 1
+
+# print("skipped, no SliceLocation: {}".format(skipcount))
+
+# # ensure they are in the correct order
+# print('Sorting start...')
+# slices = sorted(slices, key=lambda s: s.SliceLocation)
+# print('Sorting complete.')
+# # pixel aspects, assuming all slices are the same
+# ps = slices[0].PixelSpacing
+# ss = slices[0].SliceThickness
+# ax_aspect = ps[1]/ps[0]
+# sag_aspect = ps[1]/ss
+# cor_aspect = ss/ps[0]
+
+# # create 3D array
+# print('create 3D array start...')
+# img_shape = list(slices[0].pixel_array.shape)
+# img_shape.append(len(slices))
+# img3d=np.zeros(img_shape)
+# print('create 3D array complete.')
+
+
+# # fill 3D array with the images from the files и добавление з
+# print('fill 3D array start...')
+# ipp = [] # ImagePositionPatient[2] будет храниться тут
+# for i, s in enumerate(slices):
+#     img2d = s.pixel_array
+#     img3d[:,:,i] = img2d
+#     ipp.append(slices[i].ImagePositionPatient[2])
+# print('fill 3D array complete.')
+# print('Well done!')
+# #print(ipp)
+# # plot 3 orthogonal slices
+# # a1 = plt.subplot(2,2,1)
+# # plt.imshow(img3d[:,:,img_shape[2]//2])
+# # a1.set_aspect(ax_aspect)
+
+# # a2 = plt.subplot(2,2,2)
+# # plt.imshow(img3d[:,img_shape[1]//2,:])
+# # a2.set_aspect(sag_aspect)
+
+# # a3 = plt.subplot(2,2,3)
+# # plt.imshow(img3d[img_shape[0]//2,:,:].T)
+# # a3.set_aspect(cor_aspect)
+
+# # plt.show()
+
+
+
+
+def zdTranslator(index, img3d_ipp):
+    ipp, slices = img3d_ipp
+    y_temp = df['y'].iloc[index]
+    print(y_temp)
+    x = int(df['x'].iloc[index]) # x на фронтальном срезе
+    y = int(df['y'].iloc[index]) # z на фронтальном срезе
+    zm = int(df['z'].iloc[index]) # y на фронтальном срезе
+    z = ipp.index((nearest(ipp, zm)))
+    dm = df['diameter'].iloc[index]
+	print(f'x{x},zm:{zm}, dm:{dm}')
+    d = dm / slices[0].PixelSpacing[0]
+    xmin = x - d / 2
+    xmax = x + d / 2
+    ymin = z - d / 2
+    ymax = z + d / 2
+    width = xmax - xmin
+    height = ymax - ymin
+    print(f'New y(old z):{z}, d:{d}')
+    df['z_pixel'].iloc[index] = z
+    df['d_pixel'].iloc[index] = d
+    print(f'New y(old z):{z}, d:{d}')
+	
+	
+	def ipp_only(prot):
+    #d = true_dicom_finder(prot)
+    files=[]
+    files_arr = true_dicom_finder(prot)
+    # print('glob: {}'.format(sys.argv[1]))
+    print('loading start...')
+    for fname in files_arr:
+
+        # print("loading: {}".format(fname))
+        files.append(dicom.read_file(fname))
+
+    print("Loading done. File count: {}".format(len(files)))
+
+    # skip files with no SliceLocation (eg scout views)
+    slices=[]
+    skipcount=0
+    for f in files:
+        if hasattr(f, 'SliceLocation'):
+            slices.append(f)
+        else:
+            skipcount = skipcount + 1
+
+    print("skipped, no SliceLocation: {}".format(skipcount))
+
+    # ensure they are in the correct order
+    #print('Sorting start...')
+    #print(slices)
+    #slices = sorted(slices, key=lambda s: s.SliceLocation)
+    #print('Sorting complete.')
+    # pixel aspects, assuming all slices are the same
+    #ps = slices[0].PixelSpacing
+    #ss = slices[0].SliceThickness
+    #ax_aspect = ps[1]/ps[0]
+    #sag_aspect = ps[1]/ss
+    #cor_aspect = ss/ps[0]
+
+    # create 3D array
+#     print('create 3D array start...')
+#     img_shape = list(slices[0].pixel_array.shape)
+#     img_shape.append(len(slices))
+#     img3d=np.zeros(img_shape)
+#     print('create 3D array complete.')
+
+
+    # fill 3D array with the images from the files и добавление з
+    print('fill ipp array start...')
+    ipp = [] # ImagePositionPatient[2] будет храниться тут
+    for i, s in enumerate(slices):
+        #img2d = s.pixel_array
+        #img3d[:,:,i] = img2d
+        ipp.append(slices[i].ImagePositionPatient[2])
+    print('fill ipp array complete.')
+    print('Well done!')
+    return ipp, slices
+	
+	
+	
+	
+	
+	def DICOM3DTransform(prot):
+    #d = true_dicom_finder(prot)
+    files=[]
+    files_arr = true_dicom_finder(prot)
+    # print('glob: {}'.format(sys.argv[1]))
+    print('loading start...')
+    for fname in files_arr:
+
+        # print("loading: {}".format(fname))
+        files.append(dicom.read_file(fname))
+
+    print("Loading done. File count: {}".format(len(files)))
+
+    # skip files with no SliceLocation (eg scout views)
+    slices=[]
+    skipcount=0
+    for f in files:
+        if hasattr(f, 'SliceLocation'):
+            slices.append(f)
+        else:
+            skipcount = skipcount + 1
+
+    print("skipped, no SliceLocation: {}".format(skipcount))
+
+    # ensure they are in the correct order
+    print('Sorting start...')
+    print(slices)
+    slices = sorted(slices, key=lambda s: s.SliceLocation)
+    print('Sorting complete.')
+    # pixel aspects, assuming all slices are the same
+    ps = slices[0].PixelSpacing
+    ss = slices[0].SliceThickness
+    ax_aspect = ps[1]/ps[0]
+    sag_aspect = ps[1]/ss
+    cor_aspect = ss/ps[0]
+
+    # create 3D array
+    print('create 3D array start...')
+    img_shape = list(slices[0].pixel_array.shape)
+    img_shape.append(len(slices))
+    img3d=np.zeros(img_shape)
+    print('create 3D array complete.')
+
+
+    # fill 3D array with the images from the files и добавление з
+    print('fill 3D array start...')
+    ipp = [] # ImagePositionPatient[2] будет храниться тут
+    for i, s in enumerate(slices):
+        img2d = s.pixel_array
+        img3d[:,:,i] = img2d
+        ipp.append(slices[i].ImagePositionPatient[2])
+    print('fill 3D array complete.')
+    print('Well done!')
+    return img3d, ipp, slices
+	
+	
